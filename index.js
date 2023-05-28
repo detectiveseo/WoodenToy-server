@@ -34,9 +34,8 @@ async function run() {
         //                 POST API
         // ==========================================
 
-        app.post("/add-new", async(req, res) => {
+        app.post("/add-new", async (req, res) => {
             const recivedData = req.body;
-            console.log(recivedData);
             const result = await woodToyDB.insertOne(recivedData)
             res.send(result);
         })
@@ -46,48 +45,52 @@ async function run() {
         // ==========================================
         //                 POST API
         // ==========================================
-        app.get("/products", async(req, res) => {
+        app.get("/products", async (req, res) => {
             const products = await woodToyDB.find().toArray();
             res.send(products);
         })
-        app.get("/products/:id", async(req, res) => {
-            const quary = {_id: new ObjectId(req.params)};
-            const product = await  woodToyDB.findOne(quary) 
+        app.get("/products/:id", async (req, res) => {
+            const quary = { _id: new ObjectId(req.params) };
+            const product = await woodToyDB.findOne(quary)
             res.send(product)
         })
 
-        
+
         // my toys api 
-        app.get("/my-toys", async(req, res) => {
-            const email = req.body;
+        app.get("/my-toys", async (req, res) => {
             let quary = {}
-            if(req.query?.email){
-                quary = {email: req.query.email}
+            if (req.query?.email) {
+                quary = { email: req.query.email }
             }
             const result = await woodToyDB.find(quary).toArray();
             res.send(result);
         })
 
-        //product byCatagory
-
-        app.get("/category", async (req, res) => {
-            let query = {};
-            if (req.query?.category) {
-                query = { category: req.query.category };
+        // product byCatagory
+        app.get("/catagory", async (req, res) => {
+            let quary = {};
+            if (req.query?.catagory) {
+                quary = { category: req.query.catagory }
             }
+            const result = await woodToyDB.find(quary).toArray();
+            res.send(result)
+        })
+
+        //product by name 
+        app.get("/items", async (req, res) => {
+            const query = { name: { $regex: req.query.products, $options: "i" } }
             const result = await woodToyDB.find(query).toArray();
-            console.log(result);
             res.send(result);
-        });
+        })
 
 
 
         // ==========================================
         //                 DELETE API
         // ==========================================
-        app.delete("/product/:id", async(req, res) => {
+        app.delete("/product/:id", async (req, res) => {
             const id = req.params.id;
-            const quary = {_id: new ObjectId(id)}
+            const quary = { _id: new ObjectId(id) }
             const result = await woodToyDB.deleteOne(quary);
             res.send(result);
         })
