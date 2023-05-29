@@ -45,10 +45,24 @@ async function run() {
         // ==========================================
         //                 POST API
         // ==========================================
+
         app.get("/products", async (req, res) => {
-            const products = await woodToyDB.find().toArray();
+            const key = req.query.keys
+            console.log(key)
+            let query = {}
+            if (req.query?.keys) {
+                query = { name: { $regex: key, $options: "i"} }
+            }
+            if (req.query?.filter === "low") {
+                products = await woodToyDB.find(query).sort({ price: 1 }).toArray()
+            } else if (req.query?.filter === "height") {
+                products = await woodToyDB.find(query).sort({ price: -1 }).toArray()
+            } else {
+                products = await woodToyDB.find(query).toArray();
+            }
             res.send(products);
         })
+
         app.get("/products/:id", async (req, res) => {
             const quary = { _id: new ObjectId(req.params) };
             const product = await woodToyDB.findOne(quary)
@@ -87,7 +101,7 @@ async function run() {
         // ==========================================
         //                 Update POST API
         // =========================================
-        app.patch("/update/:id", async(req, res) => {
+        app.patch("/update/:id", async (req, res) => {
             const updatedProduct = req.body;
             const quary = { _id: new ObjectId(req.params.id) }
             const updProduct = {
@@ -99,7 +113,7 @@ async function run() {
                     price: updatedProduct.price,
                     category: updatedProduct.catagory,
                     description: updatedProduct.description,
-                    dimensions: {length: updatedProduct.dimensions.length, width: updatedProduct.dimensions.width, height: updatedProduct.dimensions.height}
+                    dimensions: { length: updatedProduct.dimensions.length, width: updatedProduct.dimensions.width, height: updatedProduct.dimensions.height }
                 }
             }
             console.log(updatedProduct)
