@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -8,13 +9,12 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/", (req, res) => {
-    res.send("Hello")
+    res.send("My server is runing good")
 })
 
 
+const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.PASSWORD}@cluster0.darcm8e.mongodb.net/?retryWrites=true&w=majority`;
 
-
-const uri = "mongodb+srv://detectiveseo1:BfLoIRko0w8IT2oP@cluster0.darcm8e.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -80,6 +80,30 @@ async function run() {
         app.get("/items", async (req, res) => {
             const query = { name: { $regex: req.query.products, $options: "i" } }
             const result = await woodToyDB.find(query).toArray();
+            res.send(result);
+        })
+
+
+        // ==========================================
+        //                 Update POST API
+        // =========================================
+        app.patch("/update/:id", async(req, res) => {
+            const updatedProduct = req.body;
+            const quary = { _id: new ObjectId(req.params.id) }
+            const updProduct = {
+                $set: {
+                    name: updatedProduct.name,
+                    image: updatedProduct.image,
+                    age_range: updatedProduct.age_range,
+                    category: updatedProduct.catagory,
+                    price: updatedProduct.price,
+                    category: updatedProduct.catagory,
+                    description: updatedProduct.description,
+                    dimensions: {length: updatedProduct.dimensions.length, width: updatedProduct.dimensions.width, height: updatedProduct.dimensions.height}
+                }
+            }
+            console.log(updatedProduct)
+            const result = await woodToyDB.updateOne(quary, updProduct)
             res.send(result);
         })
 
